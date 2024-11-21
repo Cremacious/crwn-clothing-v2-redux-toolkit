@@ -2,17 +2,30 @@ import { configureStore } from '@reduxjs/toolkit';
 import { rootReducer } from './root-reducer';
 import logger from 'redux-logger';
 import { getDefaultMiddleware } from '@testing-library/react';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+
+
+const persistConfig = {
+  key: 'root',
+  storage,
+  blacklist: ['user'], // Add any reducers you don't want to persist here
+};
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const middleWares = [process.env.NODE_ENV === 'development' && logger].filter(
   Boolean
 );
 
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) => getDefaultMiddleware({
     serializableCheck: false,
   }).concat(middleWares),
 });
+
+export const persistor = persistStore(store);
 
 // import { compose, createStore, applyMiddleware } from 'redux';
 // import { persistStore, persistReducer } from 'redux-persist';
